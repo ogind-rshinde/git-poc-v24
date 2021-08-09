@@ -8,11 +8,9 @@ threeMonthLastDate=$(date --date="90 days ago" +"%Y-%m-%d")
 echo "$(tput setaf 7)Executing command: git fetch origin"
 git fetch origin
 
-jiraTicket=$(echo "$BRANCH" |cut -d/ -f 1)
-jiraTicket=${jiraTicket:5}
-
 branchType=${BRANCH:0:4}
-if [[ "$branchType" == "qabg" ]]; then
+if [[ "$branchType" == "qabg" || "$branchType" == "esbg" || "$branchType" == "dvbg" ]]; then
+#if [[ "$branchType" == "qabg" ]]; then
   echo "Identifying PR number for the current branch"
   #getting the pull request number created for the current branch to merge into main branch.
   echo "$(tput setaf 7)Executing command: gh pr list --base main -s all --search 'created:>$threeMonthLastDate' | grep $BRANCH"
@@ -50,7 +48,33 @@ if [[ "$branchType" == "qabg" ]]; then
   done
 
   #Create a qarn branch from origin/release/next
-  qarnBranchName="${BRANCH/qabg/qarn}"
+  
+  if [[ "$branchType" == "qabg" ]]; then
+    qarnBranchName="${BRANCH/qabg/qarn}"
+    branchNamePrefix="qarn"
+  elif [[ "$branchType" == "esbg" ]]; then
+    while true; do
+      read -r -p "$(tput setaf 3)Do you want deploy ESN branch changes to release/next branch? yes/no: " esnStatus
+      case $esnStatus in
+      [Yy]*) break ;;
+      [Nn]*) exit ;;
+      *) echo "Please answer yes or no." ;;
+      esac
+    done
+    qarnBranchName="${BRANCH/esbg/esrn}"
+    branchNamePrefix="esrn"
+  elif [[ "$branchType" == "dvbg" ]]; then
+    while true; do
+      read -r -p "$(tput setaf 3)Do you want deploy Dev Bug branch changes to release/next branch? yes/no: " esnStatus
+      case $esnStatus in
+      [Yy]*) break ;;
+      [Nn]*) exit ;;
+      *) echo "Please answer yes or no." ;;
+      esac
+    done
+    qarnBranchName="${BRANCH/dvbg/dvrn}"
+    branchNamePrefix="dvrn"
+  fi
   echo "$(tput setaf 7)Executing command: git checkout -b $qarnBranchName origin/release/next"
   if ! git checkout --no-track -b "$qarnBranchName" origin/release/next; then
     echo "$(tput setaf 1)ERROR: Failed to create qarn branch!"
@@ -65,11 +89,11 @@ if [[ "$branchType" == "qabg" ]]; then
 
   git push origin "$qarnBranchName" -f
   releaseBranch='release/next'
-  gh pr create -t "$jiraTicket" -F "q:/vm/scm/pr-template.txt" -B "$releaseBranch" -w
+  gh pr create -t "Merge $branchNamePrefix branch for $BRANCH to release/next branch" -F "q:/vm/scm/pr-template.txt" -B "$releaseBranch"
   git checkout "$BRANCH"
 
-elif [[ "$branchType" == "qarn" ]]; then
-  # TODO: generate the PR if not already generated for QARN branch
+elif [[ "$branchType" == "qarn" || "$branchType" == "esrn" || "$branchType" == "dvrn" ]]; then
+  # generate the PR if not already generated for QARN branch
   prNumber=$(gh pr list --base release/next -s all --search "created:>$threeMonthLastDate" | grep "$BRANCH" | cut -d $'\t' -f1)
   if [[ "$prNumber" != "" ]]; then
     echo "$(tput setaf 1)ERROR: PR is already exist for this branch!"
@@ -88,7 +112,7 @@ elif [[ "$branchType" == "qarn" ]]; then
     esac
   done
   releaseBranch='release/next'
-  gh pr create -t "$jiraTicket" -F "q:/vm/scm/pr-template.txt" -B "$releaseBranch" -w
+  gh pr create -t "Merge $branchType branch for $BRANCH to release/next branch" -F "q:/vm/scm/pr-template.txt" -B "$releaseBranch"
 
 else
   echo "$(tput setaf 1) ***** This script is applicable only for qabg branches! **** "
