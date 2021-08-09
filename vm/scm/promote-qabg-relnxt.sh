@@ -65,7 +65,9 @@ if [[ "$branchType" == "qabg" ]]; then
 
   git push origin "$qarnBranchName" -f
   releaseBranch='release/next'
-  gh pr create -t "$jiraTicket" -F "q:/vm/scm/pr-template.txt" -B "$releaseBranch" -w
+  echo "PR will be created in edit mode, please update the description and create pull request."
+  read -r -p "Please press any key to continue..."
+  gh pr create -t "$jiraTicket Merge qarn branch $BRANCH to release/next branch" -B "$releaseBranch" -w
   git checkout "$BRANCH"
 
 elif [[ "$branchType" == "qarn" ]]; then
@@ -88,7 +90,9 @@ elif [[ "$branchType" == "qarn" ]]; then
     esac
   done
   releaseBranch='release/next'
-  gh pr create -t "$jiraTicket" -F "q:/vm/scm/pr-template.txt" -B "$releaseBranch" -w
+  echo "PR will be created in edit mode, please update the description and create pull request."
+  read -r -p "Please press any key to continue..."
+  gh pr create -t "$jiraTicket Merge qarn branch $BRANCH to release/next branch" -B "$releaseBranch" -w
 
 else
   echo "$(tput setaf 1) ***** This script is applicable only for qabg branches! **** "
