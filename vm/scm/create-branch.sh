@@ -36,6 +36,7 @@ done
 read -r -p "Enter JIRA Ticket Number: " ticket
 
 while :; do
+  description=""
   read -r -p "$(tput setaf 2)Enter the branch description ( maximum 30 characters): " description
   if (("${#description}" >= 1 && "${#description}" < 31)); then
     break
