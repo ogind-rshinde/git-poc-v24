@@ -62,7 +62,9 @@ if [[ "$branchType" == "hfbg" ]]; then
 
   git push origin "$hfhnBranchName" -f
   hotfixBranch='hotfix/next'
-  gh pr create -t "Merge hfhn branch for $BRANCH to hotfix/next branch" -b "hfhn PR merge to hotfix/next branch" -B "$hotfixBranch"
+  echo "PR will be created in edit mode, please update the description and create pull request."
+  read -r -p "Please press any key to continue..."
+  gh pr create -t "$jiraTicket Merge hfhn branch $BRANCH to hotfix/next branch" -B "$hotfixBranch" -w
   git checkout "$BRANCH"
 
 elif [[ "$branchType" == "hfhn" ]]; then
@@ -85,7 +87,9 @@ elif [[ "$branchType" == "hfhn" ]]; then
     esac
   done
   hotfixBranch='hotfix/next'
-  gh pr create -t "Merge hfhn branch $BRANCH to hotfix/next branch" -b "hfhn PR merge to hotfix/next branch" -B "$hotfixBranch"
+  echo "PR will be created in edit mode, please update the description and create pull request."
+  read -r -p "Please press any key to continue..."
+  gh pr create -t "$jiraTicket Merge hfhn branch $BRANCH to hotfix/next branch" -B "$hotfixBranch" -w
 
 else
   echo "$(tput setaf 1) ***** This script is applicable only for hfbg and hfhn prefix branches! **** "
