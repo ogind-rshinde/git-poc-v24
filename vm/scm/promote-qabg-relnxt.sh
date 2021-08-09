@@ -9,7 +9,7 @@ echo "$(tput setaf 7)Executing command: git fetch origin"
 git fetch origin
 
 branchType=${BRANCH:0:4}
-if [[ "$branchType" == "qabg" || "$branchType" == "esbg" ]]; then
+if [[ "$branchType" == "qabg" || "$branchType" == "esbg" || "$branchType" == "dvrn" ]]; then
 #if [[ "$branchType" == "qabg" ]]; then
   echo "Identifying PR number for the current branch"
   #getting the pull request number created for the current branch to merge into main branch.
@@ -63,8 +63,18 @@ if [[ "$branchType" == "qabg" || "$branchType" == "esbg" ]]; then
     done
     qarnBranchName="${BRANCH/esbg/esrn}"
     branchNamePrefix="esrn"
+  elif [[ "$branchType" == "dvbg" ]]; then
+    while true; do
+      read -r -p "$(tput setaf 3)Do you want deploy Dev Bug branch changes to release/next branch? yes/no: " esnStatus
+      case $esnStatus in
+      [Yy]*) break ;;
+      [Nn]*) exit ;;
+      *) echo "Please answer yes or no." ;;
+      esac
+    done
+    qarnBranchName="${BRANCH/dvbg/dvrn}"
+    branchNamePrefix="dvrn"
   fi
-  qarnBranchName="${BRANCH/qabg/qarn}"
   echo "$(tput setaf 7)Executing command: git checkout -b $qarnBranchName origin/release/next"
   if ! git checkout --no-track -b "$qarnBranchName" origin/release/next; then
     echo "$(tput setaf 1)ERROR: Failed to create qarn branch!"
@@ -82,7 +92,7 @@ if [[ "$branchType" == "qabg" || "$branchType" == "esbg" ]]; then
   gh pr create -t "Merge $branchNamePrefix branch for $BRANCH to release/next branch" -F "q:/vm/scm/pr-template.txt" -B "$releaseBranch"
   git checkout "$BRANCH"
 
-elif [[ "$branchType" == "qarn" || "$branchType" == "esrn" ]]; then
+elif [[ "$branchType" == "qarn" || "$branchType" == "esrn" || "$branchType" == "dvrn" ]]; then
   # generate the PR if not already generated for QARN branch
   prNumber=$(gh pr list --base release/next -s all --search "created:>$threeMonthLastDate" | grep "$BRANCH" | cut -d $'\t' -f1)
   if [[ "$prNumber" != "" ]]; then
