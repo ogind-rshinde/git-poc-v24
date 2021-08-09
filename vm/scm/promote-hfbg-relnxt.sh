@@ -62,7 +62,9 @@ if [[ "$branchType" == "hfbg" ]]; then
 
   git push origin "$hfrnBranchName" -f
   releaseBranch='release/next'
-  gh pr create -t "Merge hfrn branch for $BRANCH to release/next branch" -b "hfrn PR merge to release/next branch" -B "$releaseBranch"
+  echo "PR will be created in edit mode, please update the description and create pull request."
+  read -r -p "Please press any key to continue..."
+  gh pr create -t "$jiraTicket Merge hfrn branch $BRANCH to release/next branch" -B "$releaseBranch" -w
   git checkout "$BRANCH"
 
 elif [[ "$branchType" == "hfrn" ]]; then
@@ -85,7 +87,9 @@ elif [[ "$branchType" == "hfrn" ]]; then
     esac
   done
   releaseBranch='release/next'
-  gh pr create -t "Merge hfrn branch $BRANCH to release/next branch" -b "hfrn PR merge to release/next branch" -B "$releaseBranch"
+  echo "PR will be created in edit mode, please update the description and create pull request."
+  read -r -p "Please press any key to continue..."
+  gh pr create -t "$jiraTicket Merge hfrn branch $BRANCH to release/next branch" -B "$releaseBranch" -w
   hfbgBranchName="${BRANCH/hfrn/hfbg}"
   git checkout "$hfbgBranchName"
 else
